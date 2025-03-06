@@ -21,10 +21,8 @@ def date_format_obj(date_str: str) -> datetime:
 
 
 def greetings(date_str: str) -> str:
-    try:
-        date_obj = date_format_obj(date_str)
-    except ValueError as e:
-        return json.dumps({"Ошибка": str(e)}, ensure_ascii=False)
+
+    date_obj = date_format_obj(date_str)
 
     hour = date_obj.hour
     if 5 <= hour < 12:
@@ -53,7 +51,7 @@ def load_transactions() -> pd.DataFrame:
 
 def sorted_date(current_day: datetime, df: pd.DataFrame) -> pd.DataFrame:
     """Фильтрует и сортирует операции за текущий месяц."""
-    df = df.copy()  # Избегаем предупреждений pandas
+    df = df.copy()
     df["Дата операции"] = pd.to_datetime(
         df["Дата операции"], errors="coerce", dayfirst=True
     )
