@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 from datetime import datetime
@@ -7,9 +6,7 @@ import pandas as pd
 import requests
 
 # Настройка логирования
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 def date_format_obj(date_str: str) -> datetime:
@@ -37,9 +34,7 @@ def greetings(date_str: str) -> str:
 def load_transactions() -> pd.DataFrame:
     """Загружает данные о транзакциях из Excel."""
     try:
-        path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "data", "operations.xlsx")
-        )
+        path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "operations.xlsx"))
         return pd.read_excel(path)
     except FileNotFoundError:
         logging.error("Файл с операциями не найден!")
@@ -52,14 +47,10 @@ def load_transactions() -> pd.DataFrame:
 def sorted_date(current_day: datetime, df: pd.DataFrame) -> pd.DataFrame:
     """Фильтрует и сортирует операции за текущий месяц."""
     df = df.copy()
-    df["Дата операции"] = pd.to_datetime(
-        df["Дата операции"], errors="coerce", dayfirst=True
-    )
+    df["Дата операции"] = pd.to_datetime(df["Дата операции"], errors="coerce", dayfirst=True)
 
     first_day_month = datetime(current_day.year, current_day.month, 1)
-    df_filtered = df[
-        (df["Дата операции"] >= first_day_month) & (df["Дата операции"] <= current_day)
-    ]
+    df_filtered = df[(df["Дата операции"] >= first_day_month) & (df["Дата операции"] <= current_day)]
 
     df_expenses = df_filtered[df_filtered["Сумма операции"] < 0].copy()
     df_expenses["Номер карты"] = df_expenses["Номер карты"].fillna("Translation")
@@ -78,15 +69,11 @@ def cards(date_str: str) -> list:
         logging.error(f"Ошибка при обработке карт: {e}")
         return []
 
-    df_sum = (
-        df_sorted.groupby("Номер карты", as_index=False)
-        .agg(total_spent=("Сумма операции", "sum"))
-        .round(2)
-    )
+    df_sum = df_sorted.groupby("Номер карты", as_index=False).agg(total_spent=("Сумма операции", "sum")).round(2)
     df_sum["cashback"] = (df_sum["total_spent"] / 100).round(2)
     df_sum.loc[df_sum["Номер карты"] == "Translation", "cashback"] = 0
 
-    df_sum["last_digits"] = df_sum["Номер карты"].str[-4:]
+    df_sum["last_digits"] = df_sum["Номер карты"].apply(lambda x: x[-4:] if x != "Translation" else x)
 
     return df_sum[["last_digits", "total_spent", "cashback"]].to_dict("records")
 
@@ -104,9 +91,7 @@ def top_transactions(date_str: str) -> list:
     transactions_max = df_sorted.nlargest(5, "Сумма операции")[
         ["Дата операции", "Сумма операции", "Категория", "Описание"]
     ]
-    transactions_max["Дата операции"] = transactions_max["Дата операции"].dt.strftime(
-        "%d.%m.%Y"
-    )
+    transactions_max["Дата операции"] = transactions_max["Дата операции"].dt.strftime("%d.%m.%Y")
 
     return transactions_max.to_dict(orient="records")
 

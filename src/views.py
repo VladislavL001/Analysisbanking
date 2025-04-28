@@ -1,5 +1,6 @@
 import json
-from src.utils import greetings, cards, top_transactions, currency_rates, stock_prices
+
+from src.utils import cards, currency_rates, greetings, stock_prices, top_transactions
 
 
 def collect_all_data(date_str: str) -> str:
@@ -18,10 +19,12 @@ def collect_all_data(date_str: str) -> str:
                 for t in top_transactions(date_str)
             ],
             "currency_rates": currency_rates(),
-            "stock_prices": [
-                {"stock": key, "price": value} for key, value in stock_prices().items()
-            ],
+            "stock_prices": [{"stock": key, "price": value} for key, value in stock_prices().items()],
         }
         return json.dumps(result, ensure_ascii=False, indent=2)
     except Exception as e:
         return json.dumps({"error": str(e)}, ensure_ascii=False, indent=2)
+
+
+if __name__ in "__main__":
+    print(collect_all_data("21.12.2021 15:22:13"))
