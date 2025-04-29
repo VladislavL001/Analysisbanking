@@ -2,7 +2,6 @@ import json
 from unittest.mock import patch, Mock
 
 import pytest
-from requests_mock.contrib.fixture import Fixture
 
 from src.views import collect_all_data
 
